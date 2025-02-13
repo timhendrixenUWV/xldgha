@@ -13,25 +13,6 @@ param (
 [System.Net.ServicePointManager]::SecurityProtocol = 'TLS12'
 Set-Location -path $GITHUB_WORKSPACE
 
-# # Collect the variable values from the task input
-# $Goal = Get-VstsInput -Name 'goal' -Require   
-# $GHrollback= Get-VstsInput -Name 'rollback'
-# $serviceconnection = Get-VstsInput -Name 'serviceconnection' -Require   
-# $serviceEndpoint = Get-VstsEndpoint -Name $serviceconnection -Require
-# $darPackage = Get-VstsInput -Name 'darPackage'    
-# $targetEnvironment = Get-VstsInput -Name 'targetEnvironment' -Require
-
-# Collect the variable values from the task input
-# $Goal = Get-VstsInput -Name 'goal' -Require   
-# $GHrollback= Get-VstsInput -Name 'rollback'
-# $serviceconnection = Get-VstsInput -Name 'serviceconnection' -Require   
-# $serviceEndpoint = Get-VstsEndpoint -Name $serviceconnection -Require
-# $darPackage = Get-VstsInput -Name 'darPackage'    
-# $targetEnvironment = Get-VstsInput -Name 'targetEnvironment' -Require
-
-
-
-
 # Declare global variables
 $Global:XLDgoal = $GHGoal
 $Global:XLDserviceconnection = $serviceEndpoint
@@ -93,7 +74,7 @@ function Get-BlockID {
 }
 
 function Get-XLDLogs {
-    #Wachten tot dat laatste task is de status Failed of Done heeft.
+    #Wait until the last task has the status Failed or Done.
     Write-Host "Getting logs"
     $table = @()
     $errorText=""
@@ -114,7 +95,7 @@ function Get-XLDLogs {
     }
     Write-Host "Monitoring loop complete"
 
-    #logoutput genereren
+    #Generate Logoutput
     foreach($ID in $Global:blockID){
         $errorCheckUrl=$Global:baseUrl+$ID
         $errorCheckCall=Invoke-WebRequest -Uri $errorCheckUrl -Credential $Global:Cred
@@ -154,7 +135,7 @@ function Get-ServiceConnectionCredentials {
     $password = ConvertTo-SecureString $GHxldpassword -AsPlainText -Force
     $Global:Cred = New-Object System.Management.Automation.PSCredential ($GHxldusername, $password); 
 
-    # controleer de service connection
+    #Check XL Deploy Server connection
     try {
         $connectionTestUrl = $GHxldurl+"/deployit/server/state"
         Write-Host "Testing connection with of the XLDServer: "$connectionTestUrl
@@ -178,7 +159,7 @@ function Get-ServiceConnectionCredentials {
         Exit 1
     }
 
-    #checking the Target Environment
+    #Check the Target Environment
     try { $envID=[uri]::EscapeUriString($Global:XLDtargetEnvironment)
           $envTestUrl = $GHxldurl + "/deployit/repository/ci/" + $envID
           Write-Host "Checking Target Environment: "$Global:XLDtargetEnvironment
@@ -216,7 +197,7 @@ function Get-Status {
 
     Write-host "Using:" $appURL "as parent"
     
-    #check if manifestVersion has been Uploaded
+    #Check if manifestVersion has been Uploaded
     $uploadedVersionsUrl = $GHxldurl + '/deployit/repository/query?parent=' + $appURL
     Write-Host $uploadedVersionsUrl
     [xml]$uploadedVersionCall = Invoke-Webrequest $uploadedVersionsUrl -Credential $Global:Cred 
@@ -230,7 +211,7 @@ function Get-Status {
     }
     write-host "Uploaded appId: " $Global:XLDappId
 
-    #check if manifestVersion is deployed version    
+    #Check if manifestVersion is currently deployed version    
     $deployedVersionUrl = $GHxldurl + '/deployit/repository/ci/'+ $Global:XLDtargetEnvironment + '/'+ $Global:manifestApplication    
        
        
@@ -240,8 +221,6 @@ function Get-Status {
     }
     catch{
         Write-host "No deployed version found on specified environment!"
-        #$MyRequestDeployed.Content = "Nothing found"
-        #werkt niet kan geen conten zetten, vraag is of het nodig is aangezien waarde van .Content toch Null is.
     }
     if ( $deployedVersionCall.Content -like "*" +$manifestVersion + "*"){
         $Global:appIdStatus = "Deployed" 
@@ -304,8 +283,6 @@ function Get-ManifestInfoDarFile {
 
 function Invoke-XLDUpload {
 
-
-   #Endpoint en credentials uit serviceconnection halen.
     $user= $GHxldusername
     $wachtwoord = $GHxldpassword
     $uploadUrl=$GHxldurl + '/deployit/package/upload/package.dar'
@@ -327,7 +304,6 @@ function Invoke-XLDUndeployment {
     $taskCall = Invoke-WebRequest  $taskUrl -Credential $Global:Cred -ContentType "application/xml" -Method POST -Body $undeployCall.Content
     $Global:TaskId= $taskCall.content
     $startUndeployUrl= $GHxldurl+'/deployit/tasks/v2/'+$taskCall.Content+'/start'
-    #invoke-webrequest in een variabele laten gaan zo
     $startUndeployCall=Invoke-WebRequest $startUndeployUrl -ContentType 'application/json' -Credential $Global:Cred -Method Post
         
 }
