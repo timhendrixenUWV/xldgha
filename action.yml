@@ -1,0 +1,52 @@
+name: 'XL Deploy GitHub Actions'
+description: 'Executes an XL Deploy publish/install/uninstall with user-defined inputs'
+author: 'Tim Hendrixen'
+branding:
+  icon: 'sunset' 
+  color: 'blue'
+
+inputs:
+  goal:
+    description: 'Deployment goal'
+    required: true
+    type: string
+  rollback:
+    description: 'Rollback (true/false)'
+    required: true
+    type: boolean
+  xldurl:
+    description: 'XL Deploy URL'
+    required: true
+    type: string
+  xldusername:
+    description: 'XL Deploy Username'
+    required: true
+    type: string
+  xldpassword:
+    description: 'XL Deploy Password'
+    required: true
+    type: string
+  darpackage:
+    description: 'DAR Package'
+    required: true
+    type: string
+  targetenvironment:
+    description: 'Target Environment'
+    required: true
+    type: string
+
+runs:
+  using: 'composite'
+  steps:
+  - name: Run PowerShell script
+    shell: pwsh
+    run: |
+      $scriptPath = "${{ github.action_path }}/xldgha.ps1"
+      & $scriptPath `
+        -GHGoal "${{ inputs.goal }}" `
+        -GHrollback ${{ inputs.rollback }} `
+        -GHxldurl "${{ inputs.xldurl }}" `
+        -GHxldusername "${{ inputs.xldusername }}" `
+        -GHxldpassword "${{ inputs.xldpassword }}" `
+        -GHdarpackage "${{ inputs.darpackage }}" `
+        -GHtargetenvironment "${{ inputs.targetenvironment }}"
