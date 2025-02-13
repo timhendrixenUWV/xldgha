@@ -32,7 +32,7 @@ jobs:
         uses: actions/checkout@v3
       
       - name: Deploy to XL Deploy
-        uses: your-repo/xl-deploy-action@v1
+        uses: timhendrixenUWV/xldgha@v1
         with:
           goal: "deploy"
           rollback: $false
