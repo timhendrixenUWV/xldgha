@@ -35,12 +35,12 @@ jobs:
         uses: your-repo/xl-deploy-action@v1
         with:
           goal: "deploy"
-          rollback: "false"
-          xldurl: "https://your-xld-instance.com"
-          xldusername: "admin"
-          xldpassword: "your-password"
+          rollback: $false
+          xldurl: "https://xldeployinstance"
+          xldusername: "USERNAME"
+          xldpassword: "PASSWORD"
           darpackage: "your-package.dar"
-          targetenvironment: "your-environment"
+          targetenvironment: "Environment/Applications/Application Environment"
 ```
 ## How It Works
 1. The action executes a PowerShell script (`xldgha.ps1`).
