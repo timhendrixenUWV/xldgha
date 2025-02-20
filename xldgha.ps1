@@ -15,7 +15,6 @@ Set-Location -path $GITHUB_WORKSPACE
 
 # Declare global variables
 $Global:XLDgoal = $GHGoal
-$Global:XLDserviceconnection = $serviceEndpoint
 $Global:XLDdarPackage = $GHdarPackage
 $Global:XLDappId = ""
 $Global:XLDtargetEnvironment = $GHtargetEnvironment
